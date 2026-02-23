@@ -5,9 +5,8 @@ import { GlowInput } from "@/components/ui/GlowInput";
 import { useRef } from "react";
 
 const SOCIAL_LINKS = [
-  { label: "GitHub", href: "https://github.com", icon: "↗" },
-  { label: "LinkedIn", href: "https://linkedin.com", icon: "↗" },
-  { label: "Twitter", href: "https://twitter.com", icon: "↗" },
+  { label: "GitHub", href: "https://github.com/RKPinata", icon: "↗" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/danishteuku/", icon: "↗" },
 ];
 
 export function Contact() {
