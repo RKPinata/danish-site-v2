@@ -23,7 +23,7 @@ export function Hero() {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-dvh w-full flex flex-col items-center justify-center overflow-hidden"
+        className="relative min-h-svh w-full flex flex-col items-center justify-center overflow-hidden"
       >
         <Scene mousePosition={mousePosition} scrollZoom={scrollZoom} />
         <CockpitFrame />
