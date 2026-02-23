@@ -25,7 +25,7 @@ function SceneContent({ mousePosition, scrollZoom = 0 }: SceneProps) {
           </mesh>
         }
       >
-        <CockpitView mouse={mousePosition} />
+        <CockpitView mouse={mousePosition} scrollZoom={scrollZoom} />
         <Effects />
       </Suspense>
     </>

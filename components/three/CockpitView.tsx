@@ -9,14 +9,16 @@ const PARALLAX_STRENGTH = 0.1;
 const LERP_FACTOR = 0.04;
 
 const STREAK_COUNT = 120;
-const STREAK_SPEED = 0.12;
+const STREAK_SPEED_BASE = 0.12;
+const STREAK_SPEED_SCROLL_MULT = 2.5;
 const STREAK_Z_FAR = -60;
 const STREAK_Z_NEAR = 8;
 const STREAK_LENGTH = 1.8;
 const STREAK_SPREAD = 18;
 
 const DUST_COUNT = 40;
-const DUST_SPEED = 0.04;
+const DUST_SPEED_BASE = 0.04;
+const DUST_SPEED_SCROLL_MULT = 2.5;
 
 const dustVertexShader = `
   attribute float aSize;
@@ -42,9 +44,13 @@ const dustFragmentShader = `
 
 type CockpitViewProps = {
   mouse?: { x: number; y: number };
+  scrollZoom?: number;
 };
 
-export function CockpitView({ mouse = { x: 0, y: 0 } }: CockpitViewProps) {
+export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitViewProps) {
+  const speedMult = 1 + scrollZoom * STREAK_SPEED_SCROLL_MULT;
+  const streakSpeed = STREAK_SPEED_BASE * speedMult;
+  const dustSpeed = DUST_SPEED_BASE * speedMult;
   const sceneRef = useRef<THREE.Group>(null);
   const streaksRef = useRef<THREE.LineSegments>(null);
   const dustRef = useRef<THREE.Points>(null);
@@ -136,7 +142,7 @@ export function CockpitView({ mouse = { x: 0, y: 0 } }: CockpitViewProps) {
       for (let i = 0; i < STREAK_COUNT; i++) {
         const i6 = i * 6;
         const spd = streakSpeeds[i];
-        const dz = STREAK_SPEED * spd;
+        const dz = streakSpeed * spd;
         arr[i6 + 2] += dz;
         arr[i6 + 5] += dz;
         if (arr[i6 + 2] > STREAK_Z_NEAR) {
@@ -157,7 +163,7 @@ export function CockpitView({ mouse = { x: 0, y: 0 } }: CockpitViewProps) {
       const arr = pos.array as Float32Array;
       for (let i = 0; i < DUST_COUNT; i++) {
         const i3 = i * 3;
-        arr[i3 + 2] += DUST_SPEED;
+        arr[i3 + 2] += dustSpeed;
         if (arr[i3 + 2] > 5) {
           arr[i3 + 2] = -20;
           arr[i3] = (Math.random() - 0.5) * 12;
@@ -179,6 +185,16 @@ export function CockpitView({ mouse = { x: 0, y: 0 } }: CockpitViewProps) {
         fade
         speed={0.1}
       />
+
+      {/* Tiny 3D Sun — distant, emissive sphere */}
+      <mesh position={[0.4, 0.2, -85]}>
+        <sphereGeometry args={[6, 32, 32]} />
+        <meshBasicMaterial
+          color="#fff8e7"
+          toneMapped={false}
+        />
+      </mesh>
+      <pointLight position={[0.4, 0.2, -85]} color="#fff5d6" intensity={0.4} distance={120} decay={2} />
 
       {/* Warp streaks */}
       <lineSegments ref={streaksRef} geometry={streakGeo} material={streakMat} />
