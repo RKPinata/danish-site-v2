@@ -1,22 +1,113 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef } from "react";
-import { useMousePosition } from "@/lib/hooks/useMousePosition";
+import { useRef, useState, useEffect } from "react";
+import { usePointerInput } from "@/lib/hooks/usePointerInput";
 import { useHeroScrollZoom } from "@/lib/hooks/useHeroScrollZoom";
 import { motion } from "framer-motion";
 import { CockpitFrame } from "@/components/ui/CockpitFrame";
-import { Pointer } from "lucide-react";
 
 const Scene = dynamic(
   () => import("@/components/three/Scene").then((m) => ({ default: m.Scene })),
   { ssr: false }
 );
 
-export function Hero() {
+const INTRO_ZOOM_DURATION_MS = 420;
+const INTRO_ZOOM_EASE_OUT = (t: number) => 1 - (1 - t) ** 2; // ease-out quad
+
+/** When initial: slow. When user scrolls: delay scroll to show zoom, then scroll. */
+export function Hero({ onIntroZoomComplete }: { onIntroZoomComplete?: () => void }) {
   const heroRef = useRef<HTMLElement | null>(null);
-  const mousePosition = useMousePosition();
+  const { x, y, requestGyroPermission } = usePointerInput();
+  const pointerPosition = { x, y };
+  const gyroRequestedRef = useRef(false);
   const scrollZoom = useHeroScrollZoom(heroRef);
+  const [introZoom, setIntroZoom] = useState(0);
+  const [introDone, setIntroDone] = useState(false);
+  const animRef = useRef<number>(0);
+  const introCompleteRef = useRef(false);
+  const isAnimatingRef = useRef(false);
+  const onCompleteRef = useRef(onIntroZoomComplete);
+  useEffect(() => {
+    onCompleteRef.current = onIntroZoomComplete;
+  }, [onIntroZoomComplete]);
+
+  const runIntroZoom = useRef(() => {
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    const start = performance.now();
+    let didComplete = false;
+    const run = (now: number) => {
+      const raw = Math.min((now - start) / INTRO_ZOOM_DURATION_MS, 1);
+      const t = INTRO_ZOOM_EASE_OUT(raw);
+      setIntroZoom(t);
+      if (raw >= 0.75 && !didComplete) {
+        didComplete = true;
+        onCompleteRef.current?.();
+      }
+      if (raw < 1) {
+        animRef.current = requestAnimationFrame(run);
+      } else {
+        isAnimatingRef.current = false;
+        introCompleteRef.current = true;
+        setIntroDone(true);
+      }
+    };
+    animRef.current = requestAnimationFrame(run);
+  });
+
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (window.scrollY > 0 || e.deltaY <= 0) return;
+      if (introCompleteRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      runIntroZoom.current();
+    };
+    window.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    return () => {
+      window.removeEventListener("wheel", onWheel, true);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, []);
+
+  // When user scrolls back to top, reset intro so next scroll triggers zoom again
+  useEffect(() => {
+    if (scrollZoom === 0 && introDone) {
+      introCompleteRef.current = false;
+      const id = setTimeout(() => {
+        setIntroZoom(0);
+        setIntroDone(false);
+      }, 0);
+      return () => clearTimeout(id);
+    }
+  }, [scrollZoom, introDone]);
+
+  const touchStartY = useRef(0);
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY;
+      if (!gyroRequestedRef.current) {
+        gyroRequestedRef.current = true;
+        requestGyroPermission();
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (window.scrollY > 0 || introCompleteRef.current) return;
+      const dy = touchStartY.current - e.touches[0].clientY;
+      if (dy > 25) {
+        e.preventDefault();
+        runIntroZoom.current();
+      }
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove, true);
+    };
+  }, [requestGyroPermission]);
 
   return (
     <>
@@ -25,32 +116,14 @@ export function Hero() {
         ref={heroRef}
         className="relative min-h-svh w-full flex flex-col items-center justify-center overflow-hidden"
       >
-        <Scene mousePosition={mousePosition} scrollZoom={scrollZoom} />
+        <Scene mousePosition={pointerPosition} scrollZoom={scrollZoom} introZoom={introZoom} />
         <CockpitFrame />
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          {/* Mouse scroll indicator — desktop only */}
-          <span
-            className="hidden md:flex w-6 h-10 rounded-full border-2 border-[var(--glass-border)] items-start justify-center p-2 animate-[scroll-bounce_2s_ease-in-out_infinite]"
-            aria-hidden
-          >
-            <span className="w-1 h-2 rounded-full bg-[var(--glow-red)]" />
-          </span>
-          {/* Pointer scroll hint — mobile only (Lucide Pointer, ISC); same red as mouse */}
-          <span
-            className="md:hidden flex items-center justify-center text-[var(--glow-red)] opacity-50 animate-[scroll-bounce_2s_ease-in-out_infinite]"
-            aria-hidden
-          >
-            <Pointer size={28} strokeWidth={2} aria-hidden />
-          </span>
-        </motion.div>
       </section>
 
-      <div className="relative z-10 flex flex-col items-center text-center px-6 py-20">
+      <div
+        className="relative z-10 flex flex-col items-center text-center px-6 py-20 transition-opacity duration-150"
+        style={{ opacity: Math.max(introZoom, scrollZoom) }}
+      >
         <motion.h1
           className="font-display tracking-wider text-vercel-red glow-text-red uppercase"
           style={{ fontSize: "clamp(2.5rem, 10vw, 8rem)" }}

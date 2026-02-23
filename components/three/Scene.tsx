@@ -9,14 +9,16 @@ import { ScrollZoomCamera } from "./ScrollZoomCamera";
 type SceneProps = {
   mousePosition?: { x: number; y: number };
   scrollZoom?: number;
+  introZoom?: number;
 };
 
-function SceneContent({ mousePosition, scrollZoom = 0 }: SceneProps) {
+function SceneContent({ mousePosition, scrollZoom = 0, introZoom = 0 }: SceneProps) {
+  const effectiveZoom = Math.max(introZoom, scrollZoom);
   return (
     <>
-      <color attach="background" args={["#050505"]} />
+      <color attach="background" args={["#000000"]} />
       <ambientLight intensity={0.2} />
-      <ScrollZoomCamera scrollZoom={scrollZoom} />
+      <ScrollZoomCamera scrollZoom={effectiveZoom} />
       <Suspense
         fallback={
           <mesh>
@@ -25,7 +27,7 @@ function SceneContent({ mousePosition, scrollZoom = 0 }: SceneProps) {
           </mesh>
         }
       >
-        <CockpitView mouse={mousePosition} scrollZoom={scrollZoom} />
+        <CockpitView mouse={mousePosition} scrollZoom={effectiveZoom} />
         <Effects />
       </Suspense>
     </>

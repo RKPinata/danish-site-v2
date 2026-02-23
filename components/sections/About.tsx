@@ -86,9 +86,9 @@ export function About() {
             Where I&apos;ve shipped
           </h3>
           <div className="relative w-full max-w-full min-w-0" style={{ overflow: "hidden" }}>
-            {/* Vertical line */}
+            {/* Vertical line — pointer-events-none so it doesn't block card hover */}
             <div
-              className="absolute left-3 sm:left-4 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--glow-red)]/0 via-[var(--glow-red)]/40 to-[var(--glow-red)]/0"
+              className="absolute left-3 sm:left-4 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--glow-red)]/0 via-[var(--glow-red)]/40 to-[var(--glow-red)]/0 pointer-events-none"
               aria-hidden
             />
             <div className="space-y-0 w-full min-w-0" style={{ overflow: "hidden" }}>
@@ -108,7 +108,7 @@ export function About() {
                   </div>
                   {/* Card - second column can shrink; content stays within it */}
                   <div className="min-w-0 overflow-hidden">
-                    <GlassCard noMotion className="relative py-4 px-4 sm:px-6 border border-white/5 hover:border-[var(--glow-red)]/20 transition-colors min-w-0 w-full max-w-full box-border">
+                    <GlassCard noMotion className="relative z-[1] py-4 px-4 sm:px-6 border border-white/5 hover:border-[var(--glow-red)]/40 transition-colors min-w-0 w-full max-w-full box-border">
                       <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 min-w-0">
                         <span className="font-mono text-sm sm:text-base text-[var(--glow-red)] break-words min-w-0">
                           {exp.company}

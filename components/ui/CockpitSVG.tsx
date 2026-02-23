@@ -1,6 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { getYearsOfExperience } from "@/lib/constants";
+
+const MOBILE_MAX_WIDTH = 768;
 
 function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
   const s = (startDeg * Math.PI) / 180;
@@ -24,10 +27,18 @@ function tickMark(cx: number, cy: number, r1: number, r2: number, deg: number) {
 }
 
 export function CockpitSVG() {
+  const [fitMobile, setFitMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`);
+    const update = () => setFitMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
   return (
     <svg
       viewBox="0 0 1920 1080"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio={fitMobile ? "xMidYMax meet" : "xMidYMid slice"}
       className="absolute inset-0 w-full h-full"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -95,7 +106,6 @@ export function CockpitSVG() {
       <line x1="960" y1="1080" x2="1840" y2="0" stroke="#221414" strokeWidth="3.5" />
       <line x1="960" y1="1080" x2="80" y2="0" stroke="#ff3333" strokeWidth="0.4" opacity="0.05" />
       <line x1="960" y1="1080" x2="1840" y2="0" stroke="#ff3333" strokeWidth="0.4" opacity="0.05" />
-      <line x1="0" y1="2" x2="1920" y2="2" stroke="#221414" strokeWidth="3" />
 
       {/* ===== CENTER CONSOLE ===== */}
       <path

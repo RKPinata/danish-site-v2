@@ -61,7 +61,7 @@ export const PROJECTS = [
     title: "BeyondGo / Snappymob",
     description:
       "Webflow-based pages for a crypto startup; layouts, image carousel, responsiveness, scroll animation. Snappymob: site revamp, interactions, and bug fixes from design.",
-    tech: ["Webflow", "React"],
+    tech: ["Webflow"],
     href: "#",
   },
 ];

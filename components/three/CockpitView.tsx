@@ -16,32 +16,6 @@ const STREAK_Z_NEAR = 8;
 const STREAK_LENGTH = 1.8;
 const STREAK_SPREAD = 18;
 
-const DUST_COUNT = 40;
-const DUST_SPEED_BASE = 0.04;
-const DUST_SPEED_SCROLL_MULT = 2.5;
-
-const dustVertexShader = `
-  attribute float aSize;
-  attribute float aAlpha;
-  varying float vAlpha;
-  void main() {
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * (120.0 / -mvPosition.z);
-    gl_Position = projectionMatrix * mvPosition;
-    vAlpha = aAlpha;
-  }
-`;
-
-const dustFragmentShader = `
-  varying float vAlpha;
-  void main() {
-    float r = length(gl_PointCoord - 0.5);
-    if (r > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.0, r) * vAlpha;
-    gl_FragColor = vec4(0.9, 0.9, 1.0, alpha);
-  }
-`;
-
 type CockpitViewProps = {
   mouse?: { x: number; y: number };
   scrollZoom?: number;
@@ -50,10 +24,8 @@ type CockpitViewProps = {
 export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitViewProps) {
   const speedMult = 1 + scrollZoom * STREAK_SPEED_SCROLL_MULT;
   const streakSpeed = STREAK_SPEED_BASE * speedMult;
-  const dustSpeed = DUST_SPEED_BASE * speedMult;
   const sceneRef = useRef<THREE.Group>(null);
   const streaksRef = useRef<THREE.LineSegments>(null);
-  const dustRef = useRef<THREE.Points>(null);
   const parallaxRef = useRef({ x: 0, y: 0 });
 
   const { streakGeo, streakMat, streakSpeeds } = useMemo(() => {
@@ -99,35 +71,6 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
     return { streakGeo: geo, streakMat: mat, streakSpeeds: speeds };
   }, []);
 
-  const { dustGeo, dustMat } = useMemo(() => {
-    const positions = new Float32Array(DUST_COUNT * 3);
-    const sizes = new Float32Array(DUST_COUNT);
-    const alphas = new Float32Array(DUST_COUNT);
-
-    for (let i = 0; i < DUST_COUNT; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 2] = -20 + Math.random() * 25;
-      sizes[i] = 1 + Math.random() * 2;
-      alphas[i] = 0.08 + Math.random() * 0.15;
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
-    geo.setAttribute("aAlpha", new THREE.BufferAttribute(alphas, 1));
-
-    const mat = new THREE.ShaderMaterial({
-      vertexShader: dustVertexShader,
-      fragmentShader: dustFragmentShader,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-
-    return { dustGeo: geo, dustMat: mat };
-  }, []);
-
   useFrame(() => {
     if (sceneRef.current) {
       parallaxRef.current.x += (mouse.x * PARALLAX_STRENGTH - parallaxRef.current.x) * LERP_FACTOR;
@@ -153,21 +96,6 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
           arr[i6 + 1] = (Math.random() - 0.5) * STREAK_SPREAD;
           arr[i6 + 3] = arr[i6];
           arr[i6 + 4] = arr[i6 + 1];
-        }
-      }
-      pos.needsUpdate = true;
-    }
-
-    if (dustRef.current) {
-      const pos = dustGeo.getAttribute("position") as THREE.BufferAttribute;
-      const arr = pos.array as Float32Array;
-      for (let i = 0; i < DUST_COUNT; i++) {
-        const i3 = i * 3;
-        arr[i3 + 2] += dustSpeed;
-        if (arr[i3 + 2] > 5) {
-          arr[i3 + 2] = -20;
-          arr[i3] = (Math.random() - 0.5) * 12;
-          arr[i3 + 1] = (Math.random() - 0.5) * 12;
         }
       }
       pos.needsUpdate = true;
@@ -198,9 +126,6 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
 
       {/* Warp streaks */}
       <lineSegments ref={streaksRef} geometry={streakGeo} material={streakMat} />
-
-      {/* Tiny dust motes */}
-      <points ref={dustRef} geometry={dustGeo} material={dustMat} />
     </group>
   );
 }
