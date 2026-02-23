@@ -6,8 +6,8 @@ import * as THREE from "three";
 import { Stars } from "@react-three/drei";
 import { pointer } from "@/lib/pointer";
 
-const PARALLAX_STRENGTH = 0.1;
-const LERP_FACTOR = 0.04;
+const PARALLAX_STRENGTH = 0.25;
+const LERP_FACTOR = 0.08;
 
 const STREAK_COUNT = 120;
 const STREAK_SPEED_BASE = 0.12;

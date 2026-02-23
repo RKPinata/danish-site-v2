@@ -18,10 +18,13 @@ function getLocalNetworkIP() {
 }
 
 const port = process.env.PORT || 3000;
+const lifecycleScript = process.env.npm_lifecycle_script || "";
+const useHttps = lifecycleScript.includes("--experimental-https");
+const protocol = useHttps ? "https" : "http";
 const ip = getLocalNetworkIP();
 if (ip) {
-  console.log(`\n  Local:   http://localhost:${port}`);
-  console.log(`  Network: http://${ip}:${port}\n`);
+  console.log(`\n  Local:   ${protocol}://localhost:${port}`);
+  console.log(`  Network: ${protocol}://${ip}:${port}\n`);
 } else {
-  console.log(`\n  Local: http://localhost:${port}\n`);
+  console.log(`\n  Local: ${protocol}://localhost:${port}\n`);
 }

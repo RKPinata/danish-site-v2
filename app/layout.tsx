@@ -22,6 +22,9 @@ const wildWorld = localFont({
 export const metadata: Metadata = {
   title: "Frontend Engineer | Space Portfolio",
   description: "Personal portfolio — Frontend Engineer",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

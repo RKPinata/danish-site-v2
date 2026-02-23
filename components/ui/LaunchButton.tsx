@@ -52,7 +52,7 @@ export function LaunchButton({ onClick, visible, nudge = false }: LaunchButtonPr
         pointerEvents: visible ? "auto" : "none",
       }}
       transition={{ opacity: { duration: 0.25 } }}
-      className="pointer-events-auto absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 launch-button-hud"
+      className="pointer-events-auto absolute left-1/2 bottom-[28%] md:bottom-auto md:top-1/2 md:-translate-y-1/2 z-10 -translate-x-1/2 launch-button-hud"
       style={{ width: "clamp(180px, 28vw, 260px)", height: "auto" }}
       aria-label="Launch — continue to content"
       aria-hidden={!visible}
@@ -88,7 +88,7 @@ export function LaunchButton({ onClick, visible, nudge = false }: LaunchButtonPr
           fill="rgba(10, 4, 4, 0.4)"
           filter="url(#launchGl)"
           className="hud-pulse"
-          animate={nudge ? { opacity: 0.9, strokeWidth: 1.6 } : {}}
+          animate={nudge ? { opacity: 0.9 } : {}}
           transition={{ duration: nudge ? 0.15 : 0.6 }}
           style={{ opacity: 0.5 }}
         />
@@ -170,10 +170,10 @@ export function LaunchButton({ onClick, visible, nudge = false }: LaunchButtonPr
           filter="url(#launchGl)"
           animate={
             nudge
-              ? { opacity: 1, scale: 1.08 }
+              ? { opacity: 1 }
               : visible
-                ? { opacity: [0.75, 1, 0.75], scale: 1 }
-                : { opacity: 0.4, scale: 1 }
+                ? { opacity: [0.75, 1, 0.75] }
+                : { opacity: 0.4 }
           }
           transition={
             nudge

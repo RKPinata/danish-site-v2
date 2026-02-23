@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import { pointer } from "@/lib/pointer";
 
-const GYRO_LERP = 0.1;
-const GYRO_X_SCALE = 1 / 20;
-const GYRO_Y_SCALE = 1 / 20;
+const GYRO_LERP = 0.18;
+const GYRO_X_SCALE = 1 / 12;
+const GYRO_Y_SCALE = 1 / 12;
 
 function isTouchDevice(): boolean {
   if (typeof window === "undefined") return false;
@@ -51,25 +51,31 @@ export function usePointerInput() {
 
     window.addEventListener("deviceorientation", handleOrientation);
 
-    if (needsPermission()) {
-      const onFirstTouch = async () => {
-        window.removeEventListener("touchstart", onFirstTouch, true);
-        const DevOrient = window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
-        if (DevOrient.requestPermission) {
-          try {
-            const state = await DevOrient.requestPermission();
-            gyroEnabledRef.current = state === "granted";
-          } catch { /* user dismissed */ }
-        }
-      };
-      window.addEventListener("touchstart", onFirstTouch, { capture: true, once: true });
-      return () => {
-        window.removeEventListener("deviceorientation", handleOrientation);
-        window.removeEventListener("touchstart", onFirstTouch, true);
-      };
-    }
+    let pendingRequest = false;
+    const onClick = async () => {
+      if (gyroEnabledRef.current || pendingRequest) return;
+      if (!needsPermission()) {
+        gyroEnabledRef.current = true;
+        return;
+      }
+      pendingRequest = true;
+      const DevOrient = window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
+      if (DevOrient.requestPermission) {
+        try {
+          const state = await DevOrient.requestPermission();
+          gyroEnabledRef.current = state === "granted";
+        } catch { /* user dismissed */ }
+      }
+      pendingRequest = false;
+    };
+    window.addEventListener("click", onClick, { capture: true });
+    window.addEventListener("touchend", onClick, { capture: true });
 
-    return () => window.removeEventListener("deviceorientation", handleOrientation);
+    return () => {
+      window.removeEventListener("deviceorientation", handleOrientation);
+      window.removeEventListener("click", onClick, true);
+      window.removeEventListener("touchend", onClick, true);
+    };
   }, []);
 
   useEffect(() => {
