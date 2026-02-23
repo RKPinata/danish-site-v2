@@ -31,7 +31,7 @@ function easeOutCubic(t: number): number {
 
 export function Hero() {
   const heroRef = useRef<HTMLElement | null>(null);
-  const { requestGyroPermission } = usePointerInput();
+  usePointerInput();
   const scrollZoom = useHeroScrollZoom(heroRef);
   const [launched, setLaunched] = useState(false);
   const [introZoom, setIntroZoom] = useState(0);
@@ -103,7 +103,6 @@ export function Hero() {
   }, [launched, scrollZoom]);
 
   const handleLaunch = () => {
-    requestGyroPermission();
     setShowLaunch(false);
     setTimeout(() => {
       const start = performance.now();

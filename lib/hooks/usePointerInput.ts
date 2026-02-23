@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { pointer } from "@/lib/pointer";
 
-const GYRO_LERP = 0.08;
-const GYRO_X_SCALE = 1 / 45;
-const GYRO_Y_SCALE = 1 / 45;
+const GYRO_LERP = 0.1;
+const GYRO_X_SCALE = 1 / 20;
+const GYRO_Y_SCALE = 1 / 20;
 
 function isTouchDevice(): boolean {
   if (typeof window === "undefined") return false;
@@ -50,6 +50,25 @@ export function usePointerInput() {
     };
 
     window.addEventListener("deviceorientation", handleOrientation);
+
+    if (needsPermission()) {
+      const onFirstTouch = async () => {
+        window.removeEventListener("touchstart", onFirstTouch, true);
+        const DevOrient = window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
+        if (DevOrient.requestPermission) {
+          try {
+            const state = await DevOrient.requestPermission();
+            gyroEnabledRef.current = state === "granted";
+          } catch { /* user dismissed */ }
+        }
+      };
+      window.addEventListener("touchstart", onFirstTouch, { capture: true, once: true });
+      return () => {
+        window.removeEventListener("deviceorientation", handleOrientation);
+        window.removeEventListener("touchstart", onFirstTouch, true);
+      };
+    }
+
     return () => window.removeEventListener("deviceorientation", handleOrientation);
   }, []);
 
@@ -70,17 +89,4 @@ export function usePointerInput() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const requestGyroPermission = useCallback(async () => {
-    if (!needsPermission()) {
-      gyroEnabledRef.current = true;
-      return;
-    }
-    const DevOrient = window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
-    if (DevOrient.requestPermission) {
-      const state = await DevOrient.requestPermission();
-      gyroEnabledRef.current = state === "granted";
-    }
-  }, []);
-
-  return { requestGyroPermission };
 }
