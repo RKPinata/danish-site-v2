@@ -1,0 +1,47 @@
+"use client";
+
+import { Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { CockpitView } from "./CockpitView";
+import { Effects } from "./Effects";
+import { ScrollZoomCamera } from "./ScrollZoomCamera";
+
+type SceneProps = {
+  mousePosition?: { x: number; y: number };
+  scrollZoom?: number;
+};
+
+function SceneContent({ mousePosition, scrollZoom = 0 }: SceneProps) {
+  return (
+    <>
+      <color attach="background" args={["#050505"]} />
+      <ambientLight intensity={0.2} />
+      <ScrollZoomCamera scrollZoom={scrollZoom} />
+      <Suspense
+        fallback={
+          <mesh>
+            <sphereGeometry args={[0.1, 16, 16]} />
+            <meshBasicMaterial color="#ff3333" wireframe />
+          </mesh>
+        }
+      >
+        <CockpitView mouse={mousePosition} />
+        <Effects />
+      </Suspense>
+    </>
+  );
+}
+
+export function Scene(props: SceneProps) {
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
+      >
+        <SceneContent {...props} />
+      </Canvas>
+    </div>
+  );
+}
