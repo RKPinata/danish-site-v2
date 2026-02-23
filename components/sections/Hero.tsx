@@ -6,6 +6,7 @@ import { useMousePosition } from "@/lib/hooks/useMousePosition";
 import { useHeroScrollZoom } from "@/lib/hooks/useHeroScrollZoom";
 import { motion } from "framer-motion";
 import { CockpitFrame } from "@/components/ui/CockpitFrame";
+import { Pointer } from "lucide-react";
 
 const Scene = dynamic(
   () => import("@/components/three/Scene").then((m) => ({ default: m.Scene })),
@@ -22,7 +23,7 @@ export function Hero() {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+        className="relative min-h-dvh w-full flex flex-col items-center justify-center overflow-hidden"
       >
         <Scene mousePosition={mousePosition} scrollZoom={scrollZoom} />
         <CockpitFrame />
@@ -32,11 +33,19 @@ export function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
         >
+          {/* Mouse scroll indicator — desktop only */}
           <span
-            className="w-6 h-10 rounded-full border-2 border-[var(--glass-border)] flex items-start justify-center p-2 animate-[scroll-bounce_2s_ease-in-out_infinite]"
+            className="hidden md:flex w-6 h-10 rounded-full border-2 border-[var(--glass-border)] items-start justify-center p-2 animate-[scroll-bounce_2s_ease-in-out_infinite]"
             aria-hidden
           >
             <span className="w-1 h-2 rounded-full bg-[var(--glow-red)]" />
+          </span>
+          {/* Pointer scroll hint — mobile only (Lucide Pointer, ISC); same red as mouse */}
+          <span
+            className="md:hidden flex items-center justify-center text-[var(--glow-red)] opacity-50 animate-[scroll-bounce_2s_ease-in-out_infinite]"
+            aria-hidden
+          >
+            <Pointer size={28} strokeWidth={2} aria-hidden />
           </span>
         </motion.div>
       </section>

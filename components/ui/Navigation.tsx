@@ -11,12 +11,18 @@ type NavigationProps = {
 
 export function Navigation({ activeIndex, onNavigate }: NavigationProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const hide = activeIndex === 0;
 
   return (
     <>
-    <nav
+    <motion.nav
+      initial={false}
+      animate={{ opacity: hide ? 0 : 1 }}
+      transition={{ duration: 0.25 }}
       className="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-4"
+      style={{ pointerEvents: hide ? "none" : "auto" }}
       aria-label="Section navigation"
+      aria-hidden={hide}
     >
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-full min-h-[120px] bg-gradient-to-b from-transparent via-[var(--glass-border)] to-transparent" />
       {NAV_SECTIONS.map((section, i) => (
@@ -63,10 +69,15 @@ export function Navigation({ activeIndex, onNavigate }: NavigationProps) {
           </button>
         </div>
       ))}
-    </nav>
-    <nav
+    </motion.nav>
+    <motion.nav
+      initial={false}
+      animate={{ opacity: hide ? 0 : 1 }}
+      transition={{ duration: 0.25 }}
+      style={{ pointerEvents: hide ? "none" : "auto" }}
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden flex justify-center gap-8 py-4 px-6 glass-panel border-t border-[var(--glass-border)]"
       aria-label="Section navigation (mobile)"
+      aria-hidden={hide}
     >
       {NAV_SECTIONS.map((section, i) => (
         <button
@@ -80,7 +91,7 @@ export function Navigation({ activeIndex, onNavigate }: NavigationProps) {
           {section.label.replace("// ", "")}
         </button>
       ))}
-    </nav>
+    </motion.nav>
     </>
   );
 }

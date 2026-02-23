@@ -12,12 +12,13 @@ export const PARTICLE_COUNT_DESKTOP = 8000;
 export const PARTICLE_COUNT_MOBILE = 3000;
 
 /** Career start date (first professional role from LinkedIn). Update when needed. */
-export const CAREER_START_DATE = "2021-08-01";
+export const CAREER_START_DATE = "2023-03-01";
 
 export function getYearsOfExperience(): string {
   const start = new Date(CAREER_START_DATE);
   const now = new Date();
-  const years = (now.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+  const years =
+    (now.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
   const fullYears = Math.floor(years);
   return fullYears + "+";
 }
@@ -28,7 +29,7 @@ export const PROJECTS = [
     title: "AI Agents @ respond.io",
     description:
       "Led Test AI Agent feature for secure agent testing; delivered AI Agent management and conversation summarization. Resolved production issues with Sentry and backend collaboration; drove component consistency and JSDoc type documentation.",
-    tech: ["React", "TypeScript", "Sentry"],
+    tech: ["Vue", "Pinia", "Tanstack Query", "Tailwind CSS"],
     href: "https://respond.io",
   },
   {
@@ -51,7 +52,7 @@ export const PROJECTS = [
     id: "4",
     title: "Vet on Call / Pet Mall",
     description:
-      "Vet on Call: video call app with Alibaba Cloud and Vercel deployment; significantly reduced time to connect to a vet. Pet Mall: React Native e-commerce with mobile team.",
+      "video call app with Alibaba Cloud and Vercel deployment; significantly reduced time to connect to a vet. Pet Mall: React Native e-commerce with mobile team.",
     tech: ["React Native", "WebRTC", "Vercel"],
     href: "#",
   },
@@ -59,18 +60,38 @@ export const PROJECTS = [
     id: "5",
     title: "BeyondGo / Snappymob",
     description:
-      "BeyondGo: Webflow-based pages for a crypto startup; layouts, image carousel, responsiveness, scroll animation. Snappymob: site revamp, interactions, and bug fixes from design.",
+      "Webflow-based pages for a crypto startup; layouts, image carousel, responsiveness, scroll animation. Snappymob: site revamp, interactions, and bug fixes from design.",
     tech: ["Webflow", "React"],
     href: "#",
   },
 ];
 
 export const EXPERIENCE = [
-  { company: "respond.io", role: "Frontend Developer", period: "Mar 2025 – Present" },
-  { company: "Snappymob", role: "Software Engineer", period: "Jul 2023 – Feb 2025" },
-  { company: "Furtory", role: "Frontend Engineer", period: "Mar 2023 – May 2023" },
-  { company: "Doctorate Support Group (DSG)", role: "Web Dev Intern", period: "Feb 2022 – Apr 2022" },
-  { company: "UNS Electrical", role: "Frontend Dev Intern", period: "Aug 2021 – Dec 2021" },
+  {
+    company: "respond.io",
+    role: "Frontend Developer",
+    period: "Mar 2025 – Present",
+  },
+  {
+    company: "Snappymob",
+    role: "Software Engineer",
+    period: "Jul 2023 – Feb 2025",
+  },
+  {
+    company: "Furtory",
+    role: "Frontend Engineer",
+    period: "Mar 2023 – May 2023",
+  },
+  {
+    company: "Doctorate Support Group (DSG)",
+    role: "Web Dev Intern",
+    period: "Feb 2022 – Apr 2022",
+  },
+  {
+    company: "UNS Electrical",
+    role: "Frontend Dev Intern",
+    period: "Aug 2021 – Dec 2021",
+  },
 ];
 
 export const NAV_SECTIONS = [

@@ -4,14 +4,11 @@ import { SectionReveal } from "@/components/ui/SectionReveal";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { EXPERIENCE, getYearsOfExperience } from "@/lib/constants";
 
-const STATS_CONFIG = [
-  { getValue: () => getYearsOfExperience(), label: "Years experience" },
-  { getValue: () => "510", label: "Connections" },
-  { getValue: () => "∞", label: "Cups of coffee" },
-] as const;
-
 export function About() {
-  const stats = STATS_CONFIG.map((s) => ({ value: s.getValue(), label: s.label }));
+  const stats = [
+    { value: getYearsOfExperience(), label: "Years experience" },
+    { value: "∞", label: "Cups of coffee" },
+  ];
   return (
     <section id="about" className="relative min-h-screen py-24 px-6 md:px-12 lg:px-24 overflow-x-hidden w-full max-w-full box-border">
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 min-w-0 box-border">
