@@ -4,6 +4,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Stars } from "@react-three/drei";
+import { pointer } from "@/lib/pointer";
 
 const PARALLAX_STRENGTH = 0.1;
 const LERP_FACTOR = 0.04;
@@ -17,11 +18,10 @@ const STREAK_LENGTH = 1.8;
 const STREAK_SPREAD = 18;
 
 type CockpitViewProps = {
-  mouse?: { x: number; y: number };
   scrollZoom?: number;
 };
 
-export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitViewProps) {
+export function CockpitView({ scrollZoom = 0 }: CockpitViewProps) {
   const speedMult = 1 + scrollZoom * STREAK_SPEED_SCROLL_MULT;
   const streakSpeed = STREAK_SPEED_BASE * speedMult;
   const sceneRef = useRef<THREE.Group>(null);
@@ -73,8 +73,8 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
 
   useFrame(() => {
     if (sceneRef.current) {
-      parallaxRef.current.x += (mouse.x * PARALLAX_STRENGTH - parallaxRef.current.x) * LERP_FACTOR;
-      parallaxRef.current.y += (mouse.y * PARALLAX_STRENGTH - parallaxRef.current.y) * LERP_FACTOR;
+      parallaxRef.current.x += (pointer.x * PARALLAX_STRENGTH - parallaxRef.current.x) * LERP_FACTOR;
+      parallaxRef.current.y += (pointer.y * PARALLAX_STRENGTH - parallaxRef.current.y) * LERP_FACTOR;
       sceneRef.current.rotation.y = parallaxRef.current.x;
       sceneRef.current.rotation.x = parallaxRef.current.y;
     }
@@ -107,16 +107,15 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
       <Stars
         radius={80}
         depth={80}
-        count={5000}
+        count={2500}
         factor={2.5}
         saturation={0}
         fade
         speed={0.1}
       />
 
-      {/* Tiny 3D Sun — distant, emissive sphere */}
       <mesh position={[0.4, 0.2, -85]}>
-        <sphereGeometry args={[6, 32, 32]} />
+        <sphereGeometry args={[6, 16, 16]} />
         <meshBasicMaterial
           color="#fff8e7"
           toneMapped={false}
@@ -124,7 +123,6 @@ export function CockpitView({ mouse = { x: 0, y: 0 }, scrollZoom = 0 }: CockpitV
       </mesh>
       <pointLight position={[0.4, 0.2, -85]} color="#fff5d6" intensity={0.4} distance={120} decay={2} />
 
-      {/* Warp streaks */}
       <lineSegments ref={streaksRef} geometry={streakGeo} material={streakMat} />
     </group>
   );

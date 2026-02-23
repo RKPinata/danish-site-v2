@@ -7,12 +7,11 @@ import { Effects } from "./Effects";
 import { ScrollZoomCamera } from "./ScrollZoomCamera";
 
 type SceneProps = {
-  mousePosition?: { x: number; y: number };
   scrollZoom?: number;
   introZoom?: number;
 };
 
-function SceneContent({ mousePosition, scrollZoom = 0, introZoom = 0 }: SceneProps) {
+function SceneContent({ scrollZoom = 0, introZoom = 0 }: SceneProps) {
   const effectiveZoom = Math.max(introZoom, scrollZoom);
   return (
     <>
@@ -27,7 +26,7 @@ function SceneContent({ mousePosition, scrollZoom = 0, introZoom = 0 }: ScenePro
           </mesh>
         }
       >
-        <CockpitView mouse={mousePosition} scrollZoom={effectiveZoom} />
+        <CockpitView scrollZoom={effectiveZoom} />
         <Effects />
       </Suspense>
     </>
@@ -39,8 +38,8 @@ export function Scene(props: SceneProps) {
     <div className="absolute inset-0 w-full h-full">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: false, alpha: false, powerPreference: "high-performance" }}
       >
         <SceneContent {...props} />
       </Canvas>

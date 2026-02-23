@@ -34,12 +34,24 @@
 html,
 body {
   overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 body {
   background: var(--space-black);
   color: var(--star-white);
   font-family: var(--font-space-grotesk), system-ui, sans-serif;
+}
+
+/* Hide system cursor everywhere when custom cursor is active (e.g. over buttons/links) */
+body.custom-cursor-active,
+body.custom-cursor-active * {
+  cursor: none !important;
 }
 
 @keyframes starfield-twinkle {
@@ -72,6 +84,43 @@ body {
   }
 }
 
+/* HUD launch button animations */
+@keyframes hud-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hud-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(112px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes hud-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .glow-text {
   text-shadow:
     0 0 20px rgba(255, 51, 51, 0.4),
@@ -85,6 +134,44 @@ body {
     0 0 100px rgba(255, 0, 0, 0.1);
 }
 
+/* Sun-glow name treatment */
+@keyframes sun-breathe {
+  0%,
+  100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 14px rgba(255, 255, 255, 0.6),
+      0 0 30px rgba(255, 252, 245, 0.3),
+      0 0 60px rgba(255, 245, 225, 0.12);
+  }
+  50% {
+    text-shadow:
+      0 0 6px #fff,
+      0 0 20px rgba(255, 255, 255, 0.75),
+      0 0 40px rgba(255, 252, 245, 0.4),
+      0 0 80px rgba(255, 245, 225, 0.18);
+  }
+}
+
+.glow-text-sun {
+  color: #fffdf9;
+  position: relative;
+  animation: sun-breathe 4s ease-in-out infinite;
+}
+
+.sun-grain-text {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  background-clip: text;
+  -webkit-background-clip: text;
+  opacity: 0.18;
+  pointer-events: none;
+  animation: grain-drift 0.5s steps(4) infinite;
+}
+
 .glow-border:hover {
   box-shadow:
     0 0 20px rgba(255, 51, 51, 0.3),
@@ -95,4 +182,44 @@ body {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(12px);
+}
+
+/* HUD launch button animation classes */
+.hud-rotate {
+  animation: hud-rotate 20s linear infinite;
+  transform-origin: center;
+}
+
+.hud-scan {
+  animation: hud-scan 3s ease-in-out infinite;
+}
+
+.hud-pulse {
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+@keyframes grain-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 3px);
+  }
+  50% {
+    transform: translate(3px, -1px);
+  }
+  75% {
+    transform: translate(-1px, -2px);
+  }
+  100% {
+    transform: translate(2px, 1px);
+  }
+}
+
+.launch-button-hud:hover .hud-rotate {
+  animation-duration: 12s;
+}
+
+.launch-button-hud:hover .hud-pulse {
+  animation-duration: 1.2s;
 }

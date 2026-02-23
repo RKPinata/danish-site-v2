@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { pointer } from "@/lib/pointer";
 
 const GYRO_LERP = 0.08;
-const GYRO_X_SCALE = 1 / 45; // gamma ~ -45 to 45 for typical tilt -> ~ -1 to 1
-const GYRO_Y_SCALE = 1 / 45; // beta: 90 upright, 45 tilted -> (90 - beta) / 45
+const GYRO_X_SCALE = 1 / 45;
+const GYRO_Y_SCALE = 1 / 45;
 
 function isTouchDevice(): boolean {
   if (typeof window === "undefined") return false;
@@ -16,17 +17,11 @@ function needsPermission(): boolean {
   return typeof (window.DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === "function";
 }
 
-export type PointerInputResult = {
-  x: number;
-  y: number;
-  requestGyroPermission: () => Promise<void>;
-};
-
 /**
- * Returns normalized -1..1 pointer input: mouse on desktop, gyro on mobile (with optional permission request).
+ * Writes smoothed pointer input to the shared `pointer` store.
+ * R3F components read from `pointer` in useFrame — zero React re-renders.
  */
-export function usePointerInput(): PointerInputResult {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+export function usePointerInput() {
   const mouseRef = useRef({ x: 0, y: 0 });
   const gyroRef = useRef({ x: 0, y: 0 });
   const gyroEnabledRef = useRef(!needsPermission());
@@ -47,8 +42,8 @@ export function usePointerInput(): PointerInputResult {
 
     const handleOrientation = (e: DeviceOrientationEvent) => {
       if (!gyroEnabledRef.current) return;
-      const gamma = e.gamma ?? 0; // left-right tilt -90..90
-      const beta = e.beta ?? 90;  // front-back, ~90 when upright
+      const gamma = e.gamma ?? 0;
+      const beta = e.beta ?? 90;
       const x = Math.max(-1, Math.min(1, gamma * GYRO_X_SCALE));
       const y = Math.max(-1, Math.min(1, (90 - beta) * GYRO_Y_SCALE));
       gyroRef.current = { x, y };
@@ -67,7 +62,8 @@ export function usePointerInput(): PointerInputResult {
       const lerp = useGyro ? GYRO_LERP : 0.15;
       s.x += (target.x - s.x) * lerp;
       s.y += (target.y - s.y) * lerp;
-      setPosition({ x: s.x, y: s.y });
+      pointer.x = s.x;
+      pointer.y = s.y;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -86,5 +82,5 @@ export function usePointerInput(): PointerInputResult {
     }
   }, []);
 
-  return { ...position, requestGyroPermission };
+  return { requestGyroPermission };
 }

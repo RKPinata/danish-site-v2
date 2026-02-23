@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
+/** Min change in progress before we update state (reduces re-renders when scrolling back to hero). */
+const PROGRESS_EPSILON = 0.012;
+
 /**
  * Returns a 0–1 value representing how far the hero section has scrolled out of view.
  * 0 = hero at top of viewport, 1 = hero fully scrolled up (or past a threshold).
  * Used to drive zoom / camera effects when scrolling down.
+ * State updates are throttled by PROGRESS_EPSILON to avoid 60fps re-renders and lag when scrolling back up.
  */
 export function useHeroScrollZoom(heroRef: React.RefObject<HTMLElement | null>) {
   const [scrollZoom, setScrollZoom] = useState(0);
   const rafRef = useRef<number>(0);
+  const lastProgressRef = useRef<number>(-1);
 
   const update = useCallback(() => {
     if (!heroRef.current) {
@@ -21,7 +26,16 @@ export function useHeroScrollZoom(heroRef: React.RefObject<HTMLElement | null>) 
     const top = rect.top;
     // 0 when hero top is at viewport top; 1 when hero has scrolled up by its full height
     const progress = height <= 0 ? 1 : Math.min(1, Math.max(0, -top / height));
-    setScrollZoom(progress);
+    const prev = lastProgressRef.current;
+    const changed =
+      prev < 0 ||
+      Math.abs(progress - prev) > PROGRESS_EPSILON ||
+      progress === 0 ||
+      progress === 1;
+    if (changed) {
+      lastProgressRef.current = progress;
+      setScrollZoom(progress);
+    }
     rafRef.current = requestAnimationFrame(update);
   }, [heroRef]);
 

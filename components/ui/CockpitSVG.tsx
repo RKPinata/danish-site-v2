@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getYearsOfExperience } from "@/lib/constants";
+import { useYearsOfExperience } from "@/lib/hooks/useYearsOfExperience";
 
 const MOBILE_MAX_WIDTH = 768;
 
@@ -28,6 +28,8 @@ function tickMark(cx: number, cy: number, r1: number, r2: number, deg: number) {
 
 export function CockpitSVG() {
   const [fitMobile, setFitMobile] = useState(false);
+  const yoe = useYearsOfExperience();
+
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`);
     const update = () => setFitMobile(mql.matches);
@@ -37,38 +39,15 @@ export function CockpitSVG() {
   }, []);
   return (
     <svg
-      viewBox="0 0 1920 1080"
-      preserveAspectRatio={fitMobile ? "xMidYMax meet" : "xMidYMid slice"}
+      viewBox={fitMobile ? "0 -400 1920 1480" : "0 0 1920 1080"}
+      preserveAspectRatio={fitMobile ? "xMidYMax slice" : "xMidYMid slice"}
       className="absolute inset-0 w-full h-full"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <filter id="gl">
-          <feGaussianBlur stdDeviation="2" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <filter id="gl2">
-          <feGaussianBlur stdDeviation="4" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
         <linearGradient id="panelV" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#1a1010" stopOpacity="0.96" />
           <stop offset="100%" stopColor="#080404" stopOpacity="0.98" />
-        </linearGradient>
-        <linearGradient id="panelH" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#100808" stopOpacity="0.95" />
-          <stop offset="50%" stopColor="#1a1010" stopOpacity="0.96" />
-          <stop offset="100%" stopColor="#100808" stopOpacity="0.95" />
-        </linearGradient>
-        <linearGradient id="screenV" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0c0303" />
-          <stop offset="100%" stopColor="#040101" />
         </linearGradient>
         <radialGradient id="radarBg" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#0a0303" />
@@ -96,9 +75,6 @@ export function CockpitSVG() {
         <pattern id="scanH" width="1920" height="3" patternUnits="userSpaceOnUse">
           <line x1="0" y1="0" x2="1920" y2="0" stroke="#ff3333" strokeWidth="0.3" opacity="0.04" />
         </pattern>
-        <clipPath id="radarClip">
-          <circle cx="0" cy="0" r="1" />
-        </clipPath>
       </defs>
 
       {/* ===== CANOPY STRUTS ===== */}
@@ -120,7 +96,6 @@ export function CockpitSVG() {
         stroke="#ff3333"
         strokeWidth="0.6"
         opacity="0.12"
-        filter="url(#gl)"
       />
 
       {/* ─── RADAR / SCANNER (center-left) ─── */}
@@ -137,9 +112,9 @@ export function CockpitSVG() {
             <line x1={rcx - rr} y1={rcy} x2={rcx + rr} y2={rcy} stroke="#ff3333" strokeWidth="0.2" opacity="0.07" />
             <line x1={rcx} y1={rcy - rr} x2={rcx} y2={rcy + rr} stroke="#ff3333" strokeWidth="0.2" opacity="0.07" />
             {/* Sweep line */}
-            <line x1={rcx} y1={rcy} x2={rcx + rr * 0.65} y2={rcy - rr * 0.76} stroke="#ff3333" strokeWidth="0.8" opacity="0.35" filter="url(#gl)" />
+            <line x1={rcx} y1={rcy} x2={rcx + rr * 0.65} y2={rcy - rr * 0.76} stroke="#ff3333" strokeWidth="0.8" opacity="0.35" />
             {/* Contacts */}
-            <circle cx={rcx + 22} cy={rcy - 30} r="2.5" fill="#ff3333" opacity="0.4" filter="url(#gl)" />
+            <circle cx={rcx + 22} cy={rcy - 30} r="2.5" fill="#ff3333" opacity="0.4" />
             <circle cx={rcx - 35} cy={rcy + 10} r="2" fill="#3a8a4a" opacity="0.35" />
             <circle cx={rcx + 8} cy={rcy + 40} r="1.8" fill="#3a8a4a" opacity="0.3" />
             <circle cx={rcx - 15} cy={rcy - 48} r="1.5" fill="#aa8833" opacity="0.25" />
@@ -167,9 +142,9 @@ export function CockpitSVG() {
             <ellipse cx={scx} cy={scy} rx="48" ry="54" fill="none" stroke="#4488ff" strokeWidth="1.2" opacity="0.1" />
             <ellipse cx={scx} cy={scy} rx="44" ry="50" fill="none" stroke="#4488ff" strokeWidth="0.6" opacity="0.06" />
             {/* Active shield arcs (showing partial shields) */}
-            <path d={arcPath(scx, scy - 4, 52, -120, -60)} fill="none" stroke="#4488ff" strokeWidth="2.5" opacity="0.35" filter="url(#gl)" />
-            <path d={arcPath(scx, scy - 4, 52, -40, 20)} fill="none" stroke="#4488ff" strokeWidth="2.5" opacity="0.3" filter="url(#gl)" />
-            <path d={arcPath(scx, scy + 4, 52, 60, 120)} fill="none" stroke="#4488ff" strokeWidth="2" opacity="0.2" filter="url(#gl)" />
+            <path d={arcPath(scx, scy - 4, 52, -120, -60)} fill="none" stroke="#4488ff" strokeWidth="2.5" opacity="0.35" />
+            <path d={arcPath(scx, scy - 4, 52, -40, 20)} fill="none" stroke="#4488ff" strokeWidth="2.5" opacity="0.3" />
+            <path d={arcPath(scx, scy + 4, 52, 60, 120)} fill="none" stroke="#4488ff" strokeWidth="2" opacity="0.2" />
             <path d={arcPath(scx, scy + 4, 52, 140, 220)} fill="none" stroke="#2244aa" strokeWidth="1.5" opacity="0.12" />
             {/* Ship wireframe silhouette */}
             <path
@@ -187,7 +162,7 @@ export function CockpitSVG() {
             <line x1={scx} y1={scy - 38} x2={scx} y2={scy + 16} stroke="#ff3333" strokeWidth="0.3" opacity="0.12" />
             {/* Hull status text */}
             <text x={scx} y={scy + 50} textAnchor="middle" fontSize="7" fill="#604040" fontFamily="monospace" opacity="0.4">COVERAGE</text>
-            <text x={scx} y={scy + 62} textAnchor="middle" fontSize="12" fill="#3a8a4a" fontFamily="monospace" opacity="0.6" filter="url(#gl)">98%</text>
+            <text x={scx} y={scy + 62} textAnchor="middle" fontSize="12" fill="#3a8a4a" fontFamily="monospace" opacity="0.6">98%</text>
           </g>
         );
       })()}
@@ -236,7 +211,7 @@ export function CockpitSVG() {
               );
             })}
             {/* Current heading marker */}
-            <polygon points={`960,${hy - 1} 955,${hy - 7} 965,${hy - 7}`} fill="#ff3333" opacity="0.5" filter="url(#gl)" />
+            <polygon points={`960,${hy - 1} 955,${hy - 7} 965,${hy - 7}`} fill="#ff3333" opacity="0.5" />
             <text x="960" y={hy - 10} textAnchor="middle" fontSize="8" fill="#ff3333" fontFamily="monospace" opacity="0.4">STACK v4.2</text>
           </g>
         );
@@ -338,7 +313,7 @@ export function CockpitSVG() {
                   {/* Background arc */}
                   <path d={arcPath(gcx, gcy, gr, 135, 405)} fill="none" stroke="#1a0e0e" strokeWidth="4" />
                   {/* Value arc (energy level ~80%) */}
-                  <path d={arcPath(gcx, gcy, gr, 135, 351)} fill="none" stroke="url(#energyBar)" strokeWidth="4" opacity="0.4" filter="url(#gl)" />
+                  <path d={arcPath(gcx, gcy, gr, 135, 351)} fill="none" stroke="url(#energyBar)" strokeWidth="4" opacity="0.4" />
                   {/* Tick marks */}
                   {[135, 180, 225, 270, 315, 360, 405].map((d) => {
                     const t = tickMark(gcx, gcy, gr - 6, gr - 2, d);
@@ -350,7 +325,7 @@ export function CockpitSVG() {
               );
             })()}
             <text x={lx + 110} y={ly + 42} fontSize="9" fill="#888070" fontFamily="monospace" opacity="0.55">REACT.TSX</text>
-            <text x={lx + 220} y={ly + 42} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6" filter="url(#gl)">OK</text>
+            <text x={lx + 220} y={ly + 42} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6">OK</text>
             {/* Heat bar */}
             <text x={lx + 110} y={ly + 60} fontSize="6" fill="#604040" fontFamily="monospace" opacity="0.3">BUNDLE SIZE</text>
             <rect x={lx + 110} y={ly + 64} width="120" height="4" rx="1" fill="#0a0404" stroke="#1a0e0e" strokeWidth="0.3" />
@@ -370,7 +345,7 @@ export function CockpitSVG() {
                 <g>
                   <path d={arcPath(gcx, gcy, gr, 135, 405)} fill="none" stroke="#1a0e0e" strokeWidth="4" />
                   {/* Ammo level ~40% */}
-                  <path d={arcPath(gcx, gcy, gr, 135, 243)} fill="none" stroke="#ff3333" strokeWidth="4" opacity="0.3" filter="url(#gl)" />
+                  <path d={arcPath(gcx, gcy, gr, 135, 243)} fill="none" stroke="#ff3333" strokeWidth="4" opacity="0.3" />
                   {[135, 180, 225, 270, 315, 360, 405].map((d) => {
                     const t = tickMark(gcx, gcy, gr - 6, gr - 2, d);
                     return <line key={d} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="#ff3333" strokeWidth="0.3" opacity="0.15" />;
@@ -434,7 +409,7 @@ export function CockpitSVG() {
                 <g>
                   <path d={arcPath(gcx, gcy, gr, 135, 405)} fill="none" stroke="#1a0e0e" strokeWidth="4" />
                   {/* Shield level ~72% */}
-                  <path d={arcPath(gcx, gcy, gr, 135, 329.4)} fill="none" stroke="url(#shieldBar)" strokeWidth="4" opacity="0.35" filter="url(#gl)" />
+                  <path d={arcPath(gcx, gcy, gr, 135, 329.4)} fill="none" stroke="url(#shieldBar)" strokeWidth="4" opacity="0.35" />
                   {[135, 180, 225, 270, 315, 360, 405].map((d) => {
                     const t = tickMark(gcx, gcy, gr - 6, gr - 2, d);
                     return <line key={d} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="#4488ff" strokeWidth="0.3" opacity="0.15" />;
@@ -445,7 +420,7 @@ export function CockpitSVG() {
               );
             })()}
             <text x={rx + 110} y={ry + 42} fontSize="9" fill="#888070" fontFamily="monospace" opacity="0.55">TYPESCRIPT</text>
-            <text x={rx + 220} y={ry + 42} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6" filter="url(#gl)">OK</text>
+            <text x={rx + 220} y={ry + 42} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6">OK</text>
             <text x={rx + 110} y={ry + 60} fontSize="6" fill="#604040" fontFamily="monospace" opacity="0.3">TYPES/DAY</text>
             <text x={rx + 175} y={ry + 60} fontSize="7" fill="#4488ff" fontFamily="monospace" opacity="0.25">4.2</text>
             <text x={rx + 110} y={ry + 76} fontSize="6" fill="#604040" fontFamily="monospace" opacity="0.3">ANY</text>
@@ -461,7 +436,7 @@ export function CockpitSVG() {
                 <g>
                   <path d={arcPath(gcx, gcy, gr, 135, 405)} fill="none" stroke="#1a0e0e" strokeWidth="4" />
                   {/* Fuel ~65% */}
-                  <path d={arcPath(gcx, gcy, gr, 135, 310.5)} fill="none" stroke="url(#heatBar)" strokeWidth="4" opacity="0.35" filter="url(#gl)" />
+                  <path d={arcPath(gcx, gcy, gr, 135, 310.5)} fill="none" stroke="url(#heatBar)" strokeWidth="4" opacity="0.35" />
                   {[135, 180, 225, 270, 315, 360, 405].map((d) => {
                     const t = tickMark(gcx, gcy, gr - 6, gr - 2, d);
                     return <line key={d} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="#ffaa33" strokeWidth="0.3" opacity="0.15" />;
@@ -472,7 +447,7 @@ export function CockpitSVG() {
               );
             })()}
             <text x={rx + 110} y={ry + 124} fontSize="9" fill="#888070" fontFamily="monospace" opacity="0.55">TAILWIND</text>
-            <text x={rx + 220} y={ry + 124} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6" filter="url(#gl)">OK</text>
+            <text x={rx + 220} y={ry + 124} textAnchor="end" fontSize="13" fill="#3a8a4a" fontFamily="monospace" opacity="0.6">OK</text>
             <text x={rx + 110} y={ry + 142} fontSize="6" fill="#604040" fontFamily="monospace" opacity="0.3">UTILS</text>
             <text x={rx + 140} y={ry + 142} fontSize="7" fill="#ffaa33" fontFamily="monospace" opacity="0.3">4,280</text>
             <text x={rx + 110} y={ry + 158} fontSize="6" fill="#604040" fontFamily="monospace" opacity="0.3">HMR</text>
@@ -521,7 +496,7 @@ export function CockpitSVG() {
               { label: "A11Y", color: "#3a8a4a", active: true },
             ].map((ind, i) => (
               <g key={`ind-${i}`}>
-                <circle cx={610 + i * 92} cy={sy + 11} r="3" fill={ind.color} opacity="0.3" filter="url(#gl)" />
+                <circle cx={610 + i * 92} cy={sy + 11} r="3" fill={ind.color} opacity="0.3" />
                 <text x={620 + i * 92} y={sy + 14} fontSize="6.5" fill={ind.color} fontFamily="monospace" opacity="0.4">{ind.label}</text>
               </g>
             ))}
@@ -531,7 +506,7 @@ export function CockpitSVG() {
 
       {/* ===== CENTER BOTTOM — CREDITS / MISSION ===== */}
       <text x="960" y="1010" textAnchor="middle" fontSize="7" fill="#604040" fontFamily="monospace" opacity="0.25">SECTOR KL — respond.io</text>
-      <text x="960" y="1025" textAnchor="middle" fontSize="6" fill="#ff3333" fontFamily="monospace" opacity="0.15">{getYearsOfExperience()} YOE | REACT / NEXT / TS | FRONTEND DIVISION</text>
+      <text x="960" y="1025" textAnchor="middle" fontSize="6" fill="#ff3333" fontFamily="monospace" opacity="0.15">{yoe} YOE | REACT / NEXT / TS | FRONTEND DIVISION</text>
 
       {/* Edge vignette */}
       <rect x="0" y="0" width="1920" height="1080" fill="none" stroke="#050202" strokeWidth="16" opacity="0.4" />

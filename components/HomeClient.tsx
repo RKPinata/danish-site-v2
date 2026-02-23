@@ -24,18 +24,12 @@ export function HomeClient() {
     [lenisRef]
   );
 
-  const handleIntroZoomComplete = useCallback(() => {
-    if (!lenisRef.current) return;
-    const targetY = window.scrollY + window.innerHeight * 0.2;
-    lenisRef.current.scrollTo(targetY, { duration: 1 });
-  }, [lenisRef]);
-
   return (
     <>
       <CustomCursor />
       <Navigation activeIndex={activeIndex} onNavigate={handleNavigate} />
       <main className="pb-20 md:pb-0 w-full max-w-full overflow-x-hidden">
-        <Hero onIntroZoomComplete={handleIntroZoomComplete} />
+        <Hero />
         <About />
         <Projects />
         <Contact />

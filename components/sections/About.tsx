@@ -2,11 +2,13 @@
 
 import { SectionReveal } from "@/components/ui/SectionReveal";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { EXPERIENCE, getYearsOfExperience } from "@/lib/constants";
+import { EXPERIENCE } from "@/lib/constants";
+import { useYearsOfExperience } from "@/lib/hooks/useYearsOfExperience";
 
 export function About() {
+  const yoe = useYearsOfExperience();
   const stats = [
-    { value: getYearsOfExperience(), label: "Years experience" },
+    { value: yoe, label: "Years experience" },
     { value: "∞", label: "Cups of coffee" },
   ];
   return (
