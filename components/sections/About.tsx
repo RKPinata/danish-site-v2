@@ -111,7 +111,7 @@ export function About() {
                   </div>
                   {/* Card - second column can shrink; content stays within it */}
                   <div className="min-w-0 overflow-hidden">
-                    <GlassCard className="relative py-4 px-4 sm:px-6 border border-white/5 hover:border-[var(--glow-red)]/20 transition-colors min-w-0 w-full max-w-full box-border">
+                    <GlassCard noMotion className="relative py-4 px-4 sm:px-6 border border-white/5 hover:border-[var(--glow-red)]/20 transition-colors min-w-0 w-full max-w-full box-border">
                       <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 min-w-0">
                         <span className="font-mono text-sm sm:text-base text-[var(--glow-red)] break-words min-w-0">
                           {exp.company}
