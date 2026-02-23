@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { CockpitView } from "./CockpitView";
 import { Effects } from "./Effects";
@@ -9,9 +9,10 @@ import { ScrollZoomCamera } from "./ScrollZoomCamera";
 type SceneProps = {
   scrollZoom?: number;
   introZoom?: number;
+  onReady?: () => void;
 };
 
-function SceneContent({ scrollZoom = 0, introZoom = 0 }: SceneProps) {
+function SceneContent({ scrollZoom = 0, introZoom = 0 }: Omit<SceneProps, "onReady">) {
   const effectiveZoom = Math.max(introZoom, scrollZoom);
   return (
     <>
@@ -33,13 +34,18 @@ function SceneContent({ scrollZoom = 0, introZoom = 0 }: SceneProps) {
   );
 }
 
-export function Scene(props: SceneProps) {
+export function Scene({ onReady, ...props }: SceneProps) {
+  const handleCreated = useCallback(() => {
+    onReady?.();
+  }, [onReady]);
+
   return (
     <div className="absolute inset-0 w-full h-full">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
         dpr={[1, 1.5]}
         gl={{ antialias: false, alpha: false, powerPreference: "high-performance" }}
+        onCreated={handleCreated}
       >
         <SceneContent {...props} />
       </Canvas>

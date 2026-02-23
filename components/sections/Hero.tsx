@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useState, useEffect, memo } from "react";
+import { useRef, useState, useEffect, useCallback, memo } from "react";
 import { usePointerInput } from "@/lib/hooks/usePointerInput";
 import { useHeroScrollZoom } from "@/lib/hooks/useHeroScrollZoom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CockpitFrame } from "@/components/ui/CockpitFrame";
 import { LaunchButton } from "@/components/ui/LaunchButton";
 
@@ -18,6 +18,13 @@ const Scene = dynamic(
 const LAUNCH_DURATION_MS = 600;
 const LAUNCH_FADEOUT_MS = 300;
 
+const BOOT_LINES = [
+  "REACTOR ONLINE",
+  "SENSORS ONLINE",
+  "WEAPONS ONLINE",
+  "ALL SYSTEMS NOMINAL",
+];
+
 function easeOutCubic(t: number): number {
   return 1 - (1 - t) ** 3;
 }
@@ -30,9 +37,19 @@ export function Hero() {
   const [introZoom, setIntroZoom] = useState(0);
   const [showLaunch, setShowLaunch] = useState(false);
   const [scrollNudge, setScrollNudge] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [bootDone, setBootDone] = useState(false);
   const hadScrolledAwayRef = useRef(false);
   const touchStartYRef = useRef(0);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSceneReady = useCallback(() => setSceneReady(true), []);
+
+  useEffect(() => {
+    if (!sceneReady) return;
+    const timer = setTimeout(() => setBootDone(true), BOOT_LINES.length * 350 + 600);
+    return () => clearTimeout(timer);
+  }, [sceneReady]);
 
   const triggerNudge = () => {
     setShowLaunch(true);
@@ -112,9 +129,42 @@ export function Hero() {
         ref={heroRef}
         className="relative min-h-svh w-full flex flex-col items-center justify-center overflow-hidden"
       >
-        <Scene scrollZoom={scrollZoom} introZoom={introZoom} />
+        <Scene scrollZoom={scrollZoom} introZoom={introZoom} onReady={handleSceneReady} />
         <MemoizedCockpitFrame />
         <LaunchButton onClick={handleLaunch} visible={showLaunch && !launched} nudge={scrollNudge} />
+
+        <AnimatePresence>
+          {!bootDone && (
+            <motion.div
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black"
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              {/* Pulsing ring */}
+              <div className="boot-ring mb-8" />
+
+              {/* Boot text lines */}
+              <div className="font-mono text-xs sm:text-sm space-y-2 text-center">
+                {BOOT_LINES.map((line, i) => (
+                  <p
+                    key={line}
+                    className="boot-line text-glow-red/70"
+                    style={{
+                      animationDelay: sceneReady ? `${i * 350}ms` : "999s",
+                    }}
+                  >
+                    {line}
+                  </p>
+                ))}
+                {!sceneReady && (
+                  <p className="text-white/20 tracking-widest uppercase text-[10px] mt-4 boot-pulse">
+                    Initializing
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       <div
